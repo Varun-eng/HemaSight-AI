@@ -1,0 +1,56 @@
+﻿# Environment files (SECRETS — never commit these)
+.env
+.env.local
+.env.*.local
+backend/*/.env
+frontend/.env.local
+
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Next.js build output
+.next/
+out/
+dist/
+build/
+
+# Python models (large binaries)
+*.pth
+*.pkl
+*.h5
+*.onnx
+
+# Datasets (large)
+datasets/
+dataset_images/
+*.csv
+
+# Reports
+*.pdf
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Supabase
+supabase/.temp/
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
