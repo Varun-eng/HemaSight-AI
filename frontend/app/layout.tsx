@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Navbar } from '@/components/navbar';
+import { FloatingChat } from '@/components/floating-chat'; // Make sure this is here
 
 export const metadata: Metadata = {
   title: 'HemaSight AI | Early Leukemia Detection',
@@ -19,6 +20,7 @@ export default function RootLayout({
         <ThemeProvider>
           <Navbar />
           {children}
+          <FloatingChat /> {/* Make sure this is here */}
         </ThemeProvider>
       </body>
     </html>

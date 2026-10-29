@@ -15,11 +15,11 @@ const CLASS_FULL = [
 export default function Images() {
   const [classId, setClassId] = useState<number | null>(null);
   const [cbc, setCbc] = useState<any>(null);
-  const [cgan, setCgan] = useState<string | null>(null);
-  const [rendered, setRendered] = useState<string | null>(null);   // ← NEW
+  const [rendered, setRendered] = useState<string | null>(null);
   const [matched, setMatched] = useState<string | null>(null);
   const [matchedName, setMatchedName] = useState('');
   const [similarity, setSimilarity] = useState(0);
+  const [similarityMetrics, setSimilarityMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const supabase = createClient();
@@ -79,9 +79,9 @@ export default function Images() {
   const generate = async (cid: number) => {
     setLoading(true);
     setError('');
-    setCgan(null);
     setRendered(null);
     setMatched(null);
+    setSimilarityMetrics(null);
 
     try {
       const CGAN_API = process.env.NEXT_PUBLIC_CGAN_API!;
@@ -100,13 +100,11 @@ export default function Images() {
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
 
-      if (data.generated_image_base64) {
-        setCgan(`data:image/png;base64,${data.generated_image_base64}`);
-      }
       if (data.rendered_image_base64) {
-        setRendered(`data:image/png;base64,${data.rendered_image_base64}`);  // ← NEW
+        setRendered(`data:image/png;base64,${data.rendered_image_base64}`);
       }
       setSimilarity(data.similarity_score || 0);
+      if (data.similarity) setSimilarityMetrics(data.similarity);
 
       if (data.matched_dataset_image_base64) {
         setMatched(`data:image/png;base64,${data.matched_dataset_image_base64}`);
@@ -122,12 +120,19 @@ export default function Images() {
     return <div className="max-w-5xl mx-auto px-6 py-10 text-center">Loading…</div>;
   }
 
+  const verdict = (v: number) => {
+    if (v >= 70) return { text: '🟢 Strong match — highly similar', color: 'text-green-600 dark:text-green-400' };
+    if (v >= 50) return { text: '🟡 Moderate match — visually related', color: 'text-yellow-600 dark:text-yellow-400' };
+    if (v >= 30) return { text: '🟠 Weak match — some resemblance', color: 'text-orange-600 dark:text-orange-400' };
+    return { text: '🔴 Low match — significant differences', color: 'text-red-600 dark:text-red-400' };
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <h1 className="text-3xl font-bold mb-2">🧬 Microscopic Visualization</h1>
-<p className="text-slate-500 mb-6">
-  Wright-Giemsa rendered image compared with closest match from our clinical dataset.
-</p>
+      <p className="text-slate-500 mb-6">
+        Wright-Giemsa rendered image compared with closest match from our clinical dataset.
+      </p>
 
       <div className="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-5 mb-6">
         <p className="text-sm text-indigo-600 dark:text-indigo-300 font-medium mb-1">
@@ -143,7 +148,9 @@ export default function Images() {
             className="flex-1 p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm"
           >
             {CLASS_NAMES.map((n, i) => (
-              <option key={i} value={i}>{n} — {CLASS_FULL[i]}</option>
+              <option key={i} value={i}>
+                {n} — {CLASS_FULL[i]}
+              </option>
             ))}
           </select>
           <button
@@ -171,12 +178,14 @@ export default function Images() {
           </h3>
           <div className="aspect-square bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden">
             {loading && <p className="text-slate-400 text-sm">Rendering…</p>}
-            {!loading && rendered && <img src={rendered} alt="rendered" className="w-full h-full object-cover" />}
-            {!loading && !rendered && <p className="text-slate-400 text-xs text-center px-4">No render</p>}
+            {!loading && rendered && (
+              <img src={rendered} alt="rendered" className="w-full h-full object-cover" />
+            )}
+            {!loading && !rendered && (
+              <p className="text-slate-400 text-xs text-center px-4">No render</p>
+            )}
           </div>
         </div>
-
-       
 
         {/* Dataset match */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow">
@@ -190,12 +199,85 @@ export default function Images() {
           </h3>
           <div className="aspect-square bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden">
             {loading && <p className="text-slate-400 text-sm">Searching…</p>}
-            {!loading && matched && <img src={matched} alt="matched" className="w-full h-full object-cover" />}
-            {!loading && !matched && <p className="text-slate-400 text-xs text-center px-4">No match</p>}
+            {!loading && matched && (
+              <img src={matched} alt="matched" className="w-full h-full object-cover" />
+            )}
+            {!loading && !matched && (
+              <p className="text-slate-400 text-xs text-center px-4">No match</p>
+            )}
           </div>
-          {matchedName && <p className="text-xs text-slate-500 mt-2 truncate">📄 {matchedName}</p>}
+          {matchedName && (
+            <p className="text-xs text-slate-500 mt-2 truncate">📄 {matchedName}</p>
+          )}
         </div>
       </div>
+
+      {/* Similarity breakdown */}
+      {similarityMetrics && (
+        <div className="mt-6 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow">
+          <h3 className="font-bold mb-4 text-sm">📊 Similarity Breakdown</h3>
+          <div className="space-y-3">
+            {[
+              {
+                label: 'Semantic (ResNet features)',
+                value: similarityMetrics.feature_similarity,
+                weight: '40%',
+                color: 'bg-indigo-500',
+              },
+              {
+                label: 'Color / Stain match',
+                value: similarityMetrics.color_similarity,
+                weight: '25%',
+                color: 'bg-pink-500',
+              },
+              {
+                label: 'Structural (SSIM)',
+                value: similarityMetrics.structural_similarity,
+                weight: '20%',
+                color: 'bg-emerald-500',
+              },
+              {
+                label: 'Pixel match',
+                value: similarityMetrics.pixel_similarity,
+                weight: '15%',
+                color: 'bg-amber-500',
+              },
+            ].map((m) => (
+              <div key={m.label}>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="font-medium">{m.label}</span>
+                  <span className="text-slate-500">
+                    {m.value.toFixed(1)}%{' '}
+                    <span className="text-[10px]">(w: {m.weight})</span>
+                  </span>
+                </div>
+                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${m.color} transition-all`}
+                    style={{ width: `${m.value}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+
+            <div className="pt-3 mt-3 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-between text-sm font-bold">
+                <span>Overall Similarity</span>
+                <span className="text-green-600 dark:text-green-400">
+                  {similarityMetrics.overall_similarity.toFixed(2)}%
+                </span>
+              </div>
+              <p
+                className={`text-xs mt-1 ${
+                  verdict(similarityMetrics.overall_similarity).color
+                }`}
+              >
+                {verdict(similarityMetrics.overall_similarity).text}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {cbc && (
         <div className="mt-6 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow">
@@ -212,7 +294,9 @@ export default function Images() {
             ].map(([k, v, unit]: any) => (
               <div key={k}>
                 <p className="text-slate-500">{k}</p>
-                <p className="font-bold">{v} {unit}</p>
+                <p className="font-bold">
+                  {v} {unit}
+                </p>
               </div>
             ))}
           </div>

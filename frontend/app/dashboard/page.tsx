@@ -24,13 +24,43 @@ export default function Dashboard() {
     })();
   }, []);
 
-  const modules = [
-  { href: '/dashboard/screening', icon: Microscope, title: 'Blood Test Screening', desc: 'Run XGBoost risk analysis', color: 'from-blue-500 to-indigo-600' },
-  { href: '/dashboard/images', icon: Dna, title: 'Image Visualization', desc: 'Generate & compare cell images', color: 'from-purple-500 to-pink-600' },
-  { href: '/dashboard/monitoring', icon: TrendingUp, title: 'Relapse Monitoring', desc: 'Track blood patterns over time', color: 'from-green-500 to-teal-600' },
-  { href: '/dashboard/chatbot', icon: MessageCircle, title: 'AI Assistant', desc: 'Ask about your results', color: 'from-amber-500 to-orange-600' },
-  { href: '/dashboard/report', icon: FileText, title: 'Clinical Report', desc: 'Download full PDF report', color: 'from-slate-700 to-slate-900' },
-];
+      const modules = [
+    { 
+      href: '/dashboard/screening', 
+      icon: Microscope, 
+      title: 'Blood Test Screening', 
+      desc: 'Run XGBoost risk analysis', 
+      color: 'from-blue-500 to-indigo-600' 
+    },
+    { 
+      href: '/dashboard/images', 
+      icon: Dna, 
+      title: 'Image Visualization', 
+      desc: 'Generate & compare cell images', 
+      color: 'from-purple-500 to-pink-600' 
+    },
+    { 
+      href: '/dashboard/monitoring', 
+      icon: TrendingUp, 
+      title: 'Relapse Monitoring', 
+      desc: 'Track blood patterns over time', 
+      color: 'from-green-500 to-teal-600' 
+    },
+    { 
+      href: '/dashboard/report', 
+      icon: FileText, 
+      title: 'Clinical Report', 
+      desc: 'Download full PDF report', 
+      color: 'from-slate-700 to-slate-900' 
+    },
+    { 
+      href: '/dashboard/notes', 
+      icon: MessageCircle, 
+      title: 'Doctor Notes', 
+      desc: 'View clinical observations', 
+      color: 'from-amber-500 to-orange-600' 
+    }
+  ];
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
