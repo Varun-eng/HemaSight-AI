@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useSearchParams } from 'next/navigation';
 
@@ -12,7 +12,8 @@ const CLASS_FULL = [
   'Healthy (Normal Cells)',
 ];
 
-export default function Images() {
+// Separate the inner component that uses useSearchParams
+function ImageVisualization() {
   const [classId, setClassId] = useState<number | null>(null);
   const [cbc, setCbc] = useState<any>(null);
   const [rendered, setRendered] = useState<string | null>(null);
@@ -212,50 +213,25 @@ export default function Images() {
         </div>
       </div>
 
-      {/* Similarity breakdown */}
       {similarityMetrics && (
         <div className="mt-6 bg-white dark:bg-slate-800 p-5 rounded-2xl shadow">
           <h3 className="font-bold mb-4 text-sm">📊 Similarity Breakdown</h3>
           <div className="space-y-3">
             {[
-              {
-                label: 'Semantic (ResNet features)',
-                value: similarityMetrics.feature_similarity,
-                weight: '40%',
-                color: 'bg-indigo-500',
-              },
-              {
-                label: 'Color / Stain match',
-                value: similarityMetrics.color_similarity,
-                weight: '25%',
-                color: 'bg-pink-500',
-              },
-              {
-                label: 'Structural (SSIM)',
-                value: similarityMetrics.structural_similarity,
-                weight: '20%',
-                color: 'bg-emerald-500',
-              },
-              {
-                label: 'Pixel match',
-                value: similarityMetrics.pixel_similarity,
-                weight: '15%',
-                color: 'bg-amber-500',
-              },
+              { label: 'Semantic (ResNet features)', value: similarityMetrics.feature_similarity, weight: '40%', color: 'bg-indigo-500' },
+              { label: 'Color / Stain match', value: similarityMetrics.color_similarity, weight: '25%', color: 'bg-pink-500' },
+              { label: 'Structural (SSIM)', value: similarityMetrics.structural_similarity, weight: '20%', color: 'bg-emerald-500' },
+              { label: 'Pixel match', value: similarityMetrics.pixel_similarity, weight: '15%', color: 'bg-amber-500' },
             ].map((m) => (
               <div key={m.label}>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="font-medium">{m.label}</span>
                   <span className="text-slate-500">
-                    {m.value.toFixed(1)}%{' '}
-                    <span className="text-[10px]">(w: {m.weight})</span>
+                    {m.value.toFixed(1)}% <span className="text-[10px]">(w: {m.weight})</span>
                   </span>
                 </div>
                 <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${m.color} transition-all`}
-                    style={{ width: `${m.value}%` }}
-                  />
+                  <div className={`h-full ${m.color} transition-all`} style={{ width: `${m.value}%` }} />
                 </div>
               </div>
             ))}
@@ -267,11 +243,7 @@ export default function Images() {
                   {similarityMetrics.overall_similarity.toFixed(2)}%
                 </span>
               </div>
-              <p
-                className={`text-xs mt-1 ${
-                  verdict(similarityMetrics.overall_similarity).color
-                }`}
-              >
+              <p className={`text-xs mt-1 ${verdict(similarityMetrics.overall_similarity).color}`}>
                 {verdict(similarityMetrics.overall_similarity).text}
               </p>
             </div>
@@ -294,14 +266,21 @@ export default function Images() {
             ].map(([k, v, unit]: any) => (
               <div key={k}>
                 <p className="text-slate-500">{k}</p>
-                <p className="font-bold">
-                  {v} {unit}
-                </p>
+                <p className="font-bold">{v} {unit}</p>
               </div>
             ))}
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+// Main Page component with Suspense boundary
+export default function ImagesPage() {
+  return (
+    <Suspense fallback={<div className="p-10 text-center">Loading visualization...</div>}>
+      <ImageVisualization />
+    </Suspense>
   );
 }
