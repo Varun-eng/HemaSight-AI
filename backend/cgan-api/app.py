@@ -24,13 +24,7 @@ app.add_middleware(
 
 DEVICE = torch.device("cpu")
 
-CLASS_NAMES = {
-    0: "ALL",
-    1: "AML",
-    2: "CLL",
-    3: "CML",
-    4: "Healthy",
-}
+CLASS_NAMES = {0: "ALL", 1: "AML", 2: "CLL", 3: "CML", 4: "Healthy"}
 
 # ---------- Load cGAN Generator ----------
 G = Generator().to(DEVICE)
@@ -86,7 +80,8 @@ def load_dataset_index():
         image_files = [f for f in image_files if f.lower().endswith((".png", ".jpg", ".jpeg"))]
 
         class_data = []
-        for img_path in image_files[:2000]:
+        # OPTIMIZATION: Limit to 500 images to prevent RAM crash on Render free tier
+        for img_path in image_files[:500]: 
             try:
                 img = Image.open(img_path).convert("RGB")
                 tensor = feat_transform(img).unsqueeze(0).to(DEVICE)
