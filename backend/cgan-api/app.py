@@ -81,7 +81,7 @@ def load_dataset_index():
 
         class_data = []
         # OPTIMIZATION: Limit to 500 images to prevent RAM crash on Render free tier
-        for img_path in image_files[:100]: 
+        for img_path in image_files[:10]: 
             try:
                 img = Image.open(img_path).convert("RGB")
                 tensor = feat_transform(img).unsqueeze(0).to(DEVICE)
@@ -226,9 +226,10 @@ class GenerationRequest(BaseModel):
 
 @app.on_event("startup")
 async def startup_event():
-    print("🚀 Server started. Loading dataset in the background...")
-    load_dataset_index()
-    print("✅ Dataset loading complete.")
+    print("🚀 Server starting...")
+    # Run the heavy dataset loading in a background thread so it doesn't block the port
+    threading.Thread(target=load_dataset_index, daemon=True).start()
+    print("✅ Server ready. Dataset will load in the background.")
 # ---------- Endpoints ----------
 @app.get("/")
 def root():
