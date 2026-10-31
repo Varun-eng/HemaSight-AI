@@ -81,7 +81,7 @@ def load_dataset_index():
 
         class_data = []
         # OPTIMIZATION: Limit to 500 images to prevent RAM crash on Render free tier
-        for img_path in image_files[:500]: 
+        for img_path in image_files[:100]: 
             try:
                 img = Image.open(img_path).convert("RGB")
                 tensor = feat_transform(img).unsqueeze(0).to(DEVICE)
