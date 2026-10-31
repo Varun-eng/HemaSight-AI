@@ -1,12 +1,16 @@
 'use client';
 import Link from 'next/link';
-import { Activity, Github, Mail, Heart, Code } from 'lucide-react';
+import { Activity, Heart, Code, Mail, ArrowUp, MapPin } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 pt-12 pb-6 mt-auto">
+    <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 pt-12 pb-6 mt-auto relative">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
         
         {/* Brand & Description */}
@@ -15,18 +19,21 @@ export function Footer() {
             <Activity className="w-6 h-6" />
             HemaSight AI
           </Link>
-          <p className="text-slate-600 dark:text-slate-400 text-sm max-w-sm">
+          <p className="text-slate-600 dark:text-slate-400 text-sm max-w-sm mb-4">
             An advanced AI-powered platform for early leukemia detection, microscopic image visualization, 
             and post-transplant relapse monitoring.
           </p>
-          <div className="flex items-center gap-4 mt-6">
-            <a href="https://github.com/Varun-eng/HemaSight-AI" target="_blank" rel="noreferrer" 
-               className="text-slate-400 hover:text-indigo-600 transition-colors" title="GitHub Repository">
-              <Github className="w-5 h-5" />
+          
+          {/* Contact & Location */}
+          <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+            <a href="mailto:varunsd1212@gmail.com" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+              <Mail className="w-4 h-4" />
+              varunsd1212@gmail.com
             </a>
-            <a href="mailto:contact@hemasight.ai" className="text-slate-400 hover:text-indigo-600 transition-colors" title="Email">
-              <Mail className="w-5 h-5" />
-            </a>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              <span>Made in India 🇮🇳</span>
+            </div>
           </div>
         </div>
 
@@ -69,6 +76,15 @@ export function Footer() {
           Built with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> for medical advancement.
         </p>
       </div>
+
+      {/* Back to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className="absolute -top-5 right-8 p-3 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 hover:-translate-y-1 transition-all"
+        aria-label="Back to top"
+      >
+        <ArrowUp className="w-5 h-5" />
+      </button>
     </footer>
   );
 }
