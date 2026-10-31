@@ -50,7 +50,7 @@ feat_transform = transforms.Compose([
 
 # ---------- Dataset Index & Caching ----------
 DATASET_INDEX = {i: [] for i in range(NUM_CLASSES)}
-DATASET_DIR = os.path.join(os.path.dirname(__file__), "dataset_images")
+DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset_images")
 CACHE_DIR = "cache"
 def load_dataset_index():
     # DEBUG PRINT
@@ -248,15 +248,11 @@ class GenerationRequest(BaseModel):
     show_annotations: bool = True
 
 # ---------- Endpoints ----------
-@app.get("/")
-def root():
-    return {
-        "status": "ok",
-        "service": "HemaSight cGAN Visualizer",
-        "model_loaded": LOADED,
-        "dataset_index": {CLASS_NAMES[k]: len(v) for k, v in DATASET_INDEX.items()},
-    }
-
+@app.get("/force-load")
+def force_load():
+    print("🔄 Force loading dataset...")
+    threading.Thread(target=load_dataset_index, daemon=True).start()
+    return {"message": "Loading started. Check logs."}
 
 @app.post("/generate")
 def generate(req: GenerationRequest):
