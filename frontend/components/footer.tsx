@@ -24,16 +24,10 @@ export function Footer() {
             and post-transplant relapse monitoring.
           </p>
           
-          {/* Contact & Location */}
-          <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-            <a href="mailto:varunsd1212@gmail.com" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
-              <Mail className="w-4 h-4" />
-              varunsd1212@gmail.com
-            </a>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              <span>Made in India 🇮🇳</span>
-            </div>
+          {/* Location */}
+          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+            <MapPin className="w-4 h-4" />
+            <span>Made in India 🇮🇳</span>
           </div>
         </div>
 
@@ -64,12 +58,21 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-6 border-t border-slate-200 dark:border-slate-800 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
         <p>© {currentYear} HemaSight AI. All rights reserved.</p>
         
-        {/* Highlighted Designer Credit */}
-        <div className="flex items-center gap-2 px-4 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 rounded-full border border-indigo-100 dark:border-indigo-900">
-          <Code className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          <span className="text-slate-700 dark:text-slate-300 font-medium">
-            Designed & Developed by <strong className="text-indigo-600 dark:text-indigo-400">Varun D</strong>
-          </span>
+        {/* Highlighted Designer Credit with Email */}
+        <div className="flex flex-col items-center md:items-start px-4 py-2 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg border border-indigo-100 dark:border-indigo-900">
+          <div className="flex items-center gap-2">
+            <Code className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <span className="text-slate-700 dark:text-slate-300 font-medium">
+              Designed & Developed by <strong className="text-indigo-600 dark:text-indigo-400">Varun D</strong>
+            </span>
+          </div>
+          <a 
+            href="mailto:varunsd1212@gmail.com" 
+            className="text-xs text-slate-500 dark:text-slate-400 hover:text-indigo-600 flex items-center gap-1 mt-1 ml-6 transition-colors"
+          >
+            <Mail className="w-3 h-3" />
+            varunsd1212@gmail.com
+          </a>
         </div>
 
         <p className="flex items-center gap-1">
