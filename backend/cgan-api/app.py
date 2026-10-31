@@ -125,10 +125,19 @@ def generate(req: GenerationRequest):
     if not LOADED:
         raise HTTPException(503, "cGAN model not loaded")
 
+    # --- SELF-HEALING FIX ---
+    # If Render went to sleep and lost the images from RAM, load them instantly.
+    if not DATASET_INDEX[req.class_id]:
+        print("⚠️ Dataset was empty (Render woke up). Reloading images...")
+        load_dataset_index()
+    # ------------------------
+
     cbc_dict = req.cbc.dict() if req.cbc else {
         "wbc": 7.0, "rbc": 5.0, "hgb": 14.0,
         "plt": 250.0, "anc": 4.0, "blasts": 0.0, "rdw": 13.5,
     }
+
+    cond = torch.zeros(1, NUM_CLASSES)
 
     # Generate Image
     cond = torch.zeros(1, NUM_CLASSES)
