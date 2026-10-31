@@ -50,7 +50,7 @@ feat_transform = transforms.Compose([
 
 # ---------- Dataset Index & Caching ----------
 DATASET_INDEX = {i: [] for i in range(NUM_CLASSES)}
-DATASET_DIR = "dataset_images"
+DATASET_DIR = os.path.join(os.path.dirname(__file__), "dataset_images")
 CACHE_DIR = "cache"
 def load_dataset_index():
     # DEBUG PRINT
