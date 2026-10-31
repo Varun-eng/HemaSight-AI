@@ -52,7 +52,21 @@ feat_transform = transforms.Compose([
 DATASET_INDEX = {i: [] for i in range(NUM_CLASSES)}
 DATASET_DIR = "dataset_images"
 CACHE_DIR = "cache"
-
+def load_dataset_index():
+    # DEBUG PRINT
+    print("=== CHECKING DATASET FOLDER ===")
+    print(f"Current working dir: {os.getcwd()}")
+    if os.path.exists(DATASET_DIR):
+        print(f"Dataset dir exists. Contents: {os.listdir(DATASET_DIR)}")
+        for f in os.listdir(DATASET_DIR):
+            p = os.path.join(DATASET_DIR, f)
+            if os.path.isdir(p):
+                print(f" - Folder {f} has {len(os.listdir(p))} files")
+    else:
+        print("DATASET DIRECTORY DOES NOT EXIST")
+    print("===============================")
+    
+    # ... rest of your original function (os.makedirs, folder_map, etc.)
 def load_dataset_index():
     os.makedirs(CACHE_DIR, exist_ok=True)
     folder_map = {0: "all", 1: "aml", 2: "cll", 3: "cml", 4: "healthy"}
