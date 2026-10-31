@@ -11,7 +11,7 @@ import numpy as np
 import os
 import glob
 import pickle
-import threading  # <--- ADDED THIS MISSING IMPORT
+import threading
 
 from model.cgan import Generator, LATENT_DIM, NUM_CLASSES
 from microscopic_generator import generate_microscopic_image
@@ -52,21 +52,7 @@ feat_transform = transforms.Compose([
 DATASET_INDEX = {i: [] for i in range(NUM_CLASSES)}
 DATASET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset_images")
 CACHE_DIR = "cache"
-def load_dataset_index():
-    # DEBUG PRINT
-    print("=== CHECKING DATASET FOLDER ===")
-    print(f"Current working dir: {os.getcwd()}")
-    if os.path.exists(DATASET_DIR):
-        print(f"Dataset dir exists. Contents: {os.listdir(DATASET_DIR)}")
-        for f in os.listdir(DATASET_DIR):
-            p = os.path.join(DATASET_DIR, f)
-            if os.path.isdir(p):
-                print(f" - Folder {f} has {len(os.listdir(p))} files")
-    else:
-        print("DATASET DIRECTORY DOES NOT EXIST")
-    print("===============================")
-    
-    # ... rest of your original function (os.makedirs, folder_map, etc.)
+
 def load_dataset_index():
     os.makedirs(CACHE_DIR, exist_ok=True)
     folder_map = {0: "all", 1: "aml", 2: "cll", 3: "cml", 4: "healthy"}
@@ -114,15 +100,6 @@ def load_dataset_index():
             pickle.dump(class_data, f)
             
         print(f"✅ Loaded and Cached {len(class_data)} images for {CLASS_NAMES[class_id]}")
-
-
-# ---------- Startup Event (Non-blocking) ----------
-@app.on_event("startup")
-async def startup_event():
-    print("🚀 Server starting...")
-    # Run the dataset loading in a separate thread so Render detects the port immediately
-    threading.Thread(target=load_dataset_index, daemon=True).start()
-    print("✅ Server ready. Dataset will load in the background.")
 
 
 # ---------- Helpers ----------
@@ -247,12 +224,25 @@ class GenerationRequest(BaseModel):
     magnification: str = "100x"
     show_annotations: bool = True
 
+
 # ---------- Endpoints ----------
+@app.get("/")
+def root():
+    return {
+        "status": "ok",
+        "service": "HemaSight cGAN Visualizer",
+        "model_loaded": LOADED,
+        "dataset_index": {CLASS_NAMES[k]: len(v) for k, v in DATASET_INDEX.items()},
+    }
+
 @app.get("/force-load")
 def force_load():
-    print("🔄 Force loading dataset...")
-    threading.Thread(target=load_dataset_index, daemon=True).start()
-    return {"message": "Loading started. Check logs."}
+    print("🔄 Force loading dataset (Synchronous)...")
+    load_dataset_index()
+    return {
+        "message": "Loading complete", 
+        "dataset_index": {CLASS_NAMES[k]: len(v) for k, v in DATASET_INDEX.items()}
+    }
 
 @app.post("/generate")
 def generate(req: GenerationRequest):
