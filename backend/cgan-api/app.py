@@ -11,6 +11,8 @@ import numpy as np
 import os
 import glob
 import pickle
+import threading  # <--- ADDED THIS MISSING IMPORT
+
 from model.cgan import Generator, LATENT_DIM, NUM_CLASSES
 from microscopic_generator import generate_microscopic_image
 
@@ -70,7 +72,7 @@ def load_dataset_index():
             continue
             
         # --- 2. BUILD CACHE IF NOT EXISTS ---
-        print(f"⏳ First run for {CLASS_NAMES[class_id]}. Extracting features (This will only happen once)...")
+        print(f"⏳ First run for {CLASS_NAMES[class_id]}. Extracting features...")
         folder_path = os.path.join(DATASET_DIR, folder)
         if not os.path.exists(folder_path):
             print(f"   Folder missing: {folder_path}")
@@ -80,7 +82,7 @@ def load_dataset_index():
         image_files = [f for f in image_files if f.lower().endswith((".png", ".jpg", ".jpeg"))]
 
         class_data = []
-        # OPTIMIZATION: Limit to 500 images to prevent RAM crash on Render free tier
+        # Process max 10 images to ensure rapid startup
         for img_path in image_files[:10]: 
             try:
                 img = Image.open(img_path).convert("RGB")
@@ -99,6 +101,14 @@ def load_dataset_index():
             
         print(f"✅ Loaded and Cached {len(class_data)} images for {CLASS_NAMES[class_id]}")
 
+
+# ---------- Startup Event (Non-blocking) ----------
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 Server starting...")
+    # Run the dataset loading in a separate thread so Render detects the port immediately
+    threading.Thread(target=load_dataset_index, daemon=True).start()
+    print("✅ Server ready. Dataset will load in the background.")
 
 
 # ---------- Helpers ----------
@@ -217,19 +227,12 @@ class CBCData(BaseModel):
     blasts: float = 0.0
     rdw: float = 13.5
 
-
 class GenerationRequest(BaseModel):
     class_id: int
     cbc: CBCData | None = None
     magnification: str = "100x"
     show_annotations: bool = True
 
-@app.on_event("startup")
-async def startup_event():
-    print("🚀 Server starting...")
-    # Run the heavy dataset loading in a background thread so it doesn't block the port
-    threading.Thread(target=load_dataset_index, daemon=True).start()
-    print("✅ Server ready. Dataset will load in the background.")
 # ---------- Endpoints ----------
 @app.get("/")
 def root():
