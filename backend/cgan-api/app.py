@@ -83,7 +83,7 @@ def load_dataset_index():
 
         class_data = []
         # Process max 10 images to ensure rapid startup
-        for img_path in image_files[:10]: 
+        for img_path in image_files[:1]: 
             try:
                 img = Image.open(img_path).convert("RGB")
                 tensor = feat_transform(img).unsqueeze(0).to(DEVICE)
