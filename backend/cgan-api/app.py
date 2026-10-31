@@ -99,7 +99,6 @@ def load_dataset_index():
             
         print(f"✅ Loaded and Cached {len(class_data)} images for {CLASS_NAMES[class_id]}")
 
-load_dataset_index()
 
 
 # ---------- Helpers ----------
@@ -225,7 +224,11 @@ class GenerationRequest(BaseModel):
     magnification: str = "100x"
     show_annotations: bool = True
 
-
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 Server started. Loading dataset in the background...")
+    load_dataset_index()
+    print("✅ Dataset loading complete.")
 # ---------- Endpoints ----------
 @app.get("/")
 def root():
