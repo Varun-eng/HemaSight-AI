@@ -3,19 +3,16 @@ import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import { useTheme } from './theme-provider';
 import { createClient } from '@/lib/supabase/client';
-import { Moon, Sun, Activity, FileText, Stethoscope, ChevronDown, User, Menu, X } from 'lucide-react';
+import { Moon, Sun, Activity, FileText, Stethoscope, ChevronDown, MessageCircle, Brain } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function Navbar() {
   const { theme, toggle } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [role, setRole] = useState<string | null>(null);
-  
-  // Dropdown & Mobile Menu State
-  const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
   const supabase = createClient();
   const router = useRouter();
 
@@ -23,7 +20,7 @@ export function Navbar() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setLoginDropdownOpen(false);
+        setDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -74,139 +71,162 @@ export function Navbar() {
   const isDoctor = role === 'doctor' || role === 'admin';
 
   return (
-    <nav className="sticky top-0 z-[999] backdrop-blur-lg bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex justify-between items-center">
-        
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-indigo-600 dark:text-indigo-400">
+    <nav className="sticky top-0 z-50 backdrop-blur-lg bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-700">
+      <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-bold text-xl text-indigo-600 dark:text-indigo-400"
+        >
           <Activity className="w-6 h-6" />
           HemaSight AI
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/#workflow" className="hover:text-indigo-600">Workflow</Link>
-          <Link href="/#about" className="hover:text-indigo-600">About</Link>
+        <div className="flex items-center gap-4">
+          <Link href="/#workflow" className="hidden md:inline hover:text-indigo-600">
+            Workflow
+          </Link>
+          <Link href="/#about" className="hidden md:inline hover:text-indigo-600">
+            About
+          </Link>
 
-          <button onClick={toggle} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          <button
+            onClick={toggle}
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
           </button>
 
           {user ? (
             <>
+              {/* --- PATIENT / DOCTOR SPECIFIC LINKS --- */}
               {isDoctor ? (
-                <Link href="/doctor/dashboard" className="flex items-center gap-1 font-medium text-teal-600 dark:text-teal-400">
-                  <Stethoscope className="w-4 h-4" /> Doctor Dashboard
+                <Link
+                  href="/doctor/dashboard"
+                  className="hidden md:inline-flex items-center gap-1 font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700"
+                >
+                  <Stethoscope className="w-4 h-4" />
+                  Doctor Dashboard
                 </Link>
               ) : (
-                <Link href="/dashboard/report" className="flex items-center gap-1 font-medium hover:text-indigo-600">
-                  <FileText className="w-4 h-4" /> Report
-                </Link>
+                <>
+                  {/* Navbar links for Patients */}
+                  <Link
+                    href="/dashboard/screening"
+                    className="hidden md:inline-flex items-center gap-1 font-medium hover:text-indigo-600"
+                  >
+                    <MicroscopeIcon /> Screening
+                  </Link>
+                  <Link
+                    href="/dashboard/chatbot"
+                    className="hidden md:inline-flex items-center gap-1 font-medium hover:text-indigo-600"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Chatbot
+                  </Link>
+                  <Link
+                    href="/dashboard/report"
+                    className="hidden md:inline-flex items-center gap-1 font-medium hover:text-indigo-600"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Report
+                  </Link>
+                </>
               )}
 
               <Link
                 href={isDoctor ? '/doctor/dashboard' : '/dashboard'}
                 className={`px-4 py-2 rounded-lg text-white ${
-                  isDoctor ? 'bg-teal-600 hover:bg-teal-700' : 'bg-indigo-600 hover:bg-indigo-700'
+                  isDoctor
+                    ? 'bg-teal-600 hover:bg-teal-700'
+                    : 'bg-indigo-600 hover:bg-indigo-700'
                 }`}
               >
                 {isDoctor ? 'Doctor Panel' : 'Dashboard'}
               </Link>
 
-              <button onClick={logout} className="text-sm text-slate-600 dark:text-slate-400 hover:text-red-600">
+              <button
+                onClick={logout}
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-red-600"
+              >
                 Logout
               </button>
             </>
           ) : (
             <>
-              {/* Login Dropdown */}
+              <Link
+                href="/doctor/login"
+                className="hidden md:inline-flex items-center gap-1 text-sm text-slate-500 hover:text-teal-600 dark:hover:text-teal-400"
+              >
+                <Stethoscope className="w-4 h-4" />
+                Doctor Login
+              </Link>
+              
+              <Link href="/login" className="hover:text-indigo-600 font-medium">
+                Login
+              </Link>
+
+              {/* Register Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={() => setLoginDropdownOpen(!loginDropdownOpen)}
-                  className="flex items-center gap-1 text-slate-600 dark:text-slate-300 hover:text-indigo-600 font-medium py-2"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 flex items-center gap-1 font-medium"
                 >
-                  Login <ChevronDown className={`w-4 h-4 transition-transform ${loginDropdownOpen ? 'rotate-180' : ''}`} />
+                  Register
+                  <ChevronDown className="w-4 h-4" />
                 </button>
                 
-                {loginDropdownOpen && (
-                  <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-2 z-50">
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-2 z-50">
                     <Link 
-                      href="/login" 
-                      onClick={() => setLoginDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium"
+                      href="/register" 
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium"
                     >
-                      <User className="w-4 h-4 text-indigo-500" />
-                      Patient Login
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                        <Activity className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div>
+                        <p className="text-slate-900 dark:text-white">Patient</p>
+                        <p className="text-[10px] text-slate-500">Track your blood tests</p>
+                      </div>
                     </Link>
+                    
                     <div className="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
+                    
                     <Link 
-                      href="/doctor/login" 
-                      onClick={() => setLoginDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium"
+                      href="/doctor/register" 
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium"
                     >
-                      <Stethoscope className="w-4 h-4 text-teal-500" />
-                      Doctor Login
+                      <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
+                        <Stethoscope className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                      </div>
+                      <div>
+                        <p className="text-slate-900 dark:text-white">Doctor</p>
+                        <p className="text-[10px] text-slate-500">Manage patient records</p>
+                      </div>
                     </Link>
                   </div>
                 )}
               </div>
-
-              <Link href="/register" className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
-                Register
-              </Link>
             </>
           )}
         </div>
-
-        {/* Mobile Hamburger Button */}
-        <div className="flex md:hidden items-center gap-4">
-          <button onClick={toggle} className="p-2 rounded-lg">
-            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-700 dark:text-slate-200">
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
       </div>
-
-      {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-4 space-y-4 shadow-lg absolute w-full left-0">
-          <Link href="/#workflow" onClick={() => setMobileMenuOpen(false)} className="block font-medium">Workflow</Link>
-          <Link href="/#about" onClick={() => setMobileMenuOpen(false)} className="block font-medium">About</Link>
-          
-          <div className="h-px bg-slate-100 dark:bg-slate-800 w-full my-2"></div>
-
-          {user ? (
-            <div className="space-y-3">
-              <Link 
-                href={isDoctor ? '/doctor/dashboard' : '/dashboard'} 
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block text-center px-4 py-2 rounded-lg text-white font-medium ${
-                  isDoctor ? 'bg-teal-600' : 'bg-indigo-600'
-                }`}
-              >
-                {isDoctor ? 'Doctor Panel' : 'Dashboard'}
-              </Link>
-              <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="block w-full text-center text-red-500 font-medium py-2">
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block font-medium text-indigo-600">Patient Login</Link>
-              <Link href="/doctor/login" onClick={() => setMobileMenuOpen(false)} className="block font-medium text-teal-600">Doctor Login</Link>
-              <Link 
-                href="/register" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-center px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium"
-              >
-                Register
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
     </nav>
+  );
+}
+
+// Small helper for the Microscope icon in the navbar
+function MicroscopeIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>
+    </svg>
   );
 }
