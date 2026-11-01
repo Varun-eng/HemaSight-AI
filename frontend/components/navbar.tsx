@@ -3,24 +3,32 @@ import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import { useTheme } from './theme-provider';
 import { createClient } from '@/lib/supabase/client';
-import { Moon, Sun, Activity, FileText, Stethoscope, ChevronDown, MessageCircle, Brain } from 'lucide-react';
+import { Moon, Sun, Activity, FileText, Stethoscope, ChevronDown, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function Navbar() {
   const { theme, toggle } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [role, setRole] = useState<string | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Dropdown states
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  
+  const loginRef = useRef<HTMLDivElement>(null);
+  const registerRef = useRef<HTMLDivElement>(null);
   
   const supabase = createClient();
   const router = useRouter();
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
+      if (loginRef.current && !loginRef.current.contains(event.target as Node)) {
+        setLoginOpen(false);
+      }
+      if (registerRef.current && !registerRef.current.contains(event.target as Node)) {
+        setRegisterOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -102,8 +110,8 @@ export function Navbar() {
           </button>
 
           {user ? (
+            /* ================= LOGGED IN STATE ================= */
             <>
-              {/* --- PATIENT / DOCTOR SPECIFIC LINKS --- */}
               {isDoctor ? (
                 <Link
                   href="/doctor/dashboard"
@@ -114,26 +122,21 @@ export function Navbar() {
                 </Link>
               ) : (
                 <>
-                  {/* Navbar links for Patients */}
-                  <Link
-                    href="/dashboard/screening"
-                    className="hidden md:inline-flex items-center gap-1 font-medium hover:text-indigo-600"
-                  >
-                    <MicroscopeIcon /> Screening
-                  </Link>
-                  <Link
-                    href="/dashboard/chatbot"
-                    className="hidden md:inline-flex items-center gap-1 font-medium hover:text-indigo-600"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Chatbot
-                  </Link>
                   <Link
                     href="/dashboard/report"
                     className="hidden md:inline-flex items-center gap-1 font-medium hover:text-indigo-600"
                   >
                     <FileText className="w-4 h-4" />
                     Report
+                  </Link>
+                  
+                  {/* Chatbot is ONLY visible when logged in */}
+                  <Link
+                    href="/dashboard/chatbot"
+                    className="hidden md:inline-flex items-center gap-1 font-medium hover:text-indigo-600"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Chatbot
                   </Link>
                 </>
               )}
@@ -157,34 +160,68 @@ export function Navbar() {
               </button>
             </>
           ) : (
+            /* ================= LOGGED OUT STATE ================= */
             <>
-              <Link
-                href="/doctor/login"
-                className="hidden md:inline-flex items-center gap-1 text-sm text-slate-500 hover:text-teal-600 dark:hover:text-teal-400"
-              >
-                <Stethoscope className="w-4 h-4" />
-                Doctor Login
-              </Link>
-              
-              <Link href="/login" className="hover:text-indigo-600 font-medium">
-                Login
-              </Link>
-
-              {/* Register Dropdown */}
-              <div className="relative" ref={dropdownRef}>
+              {/* --- LOGIN DROPDOWN --- */}
+              <div className="relative" ref={loginRef}>
                 <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  onClick={() => { setLoginOpen(!loginOpen); setRegisterOpen(false); }}
+                  className="flex items-center gap-1 font-medium hover:text-indigo-600"
+                >
+                  Login
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                
+                {loginOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-2 z-50">
+                    <Link 
+                      href="/login" 
+                      onClick={() => setLoginOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                        <Activity className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div>
+                        <p className="text-slate-900 dark:text-white">Patient Login</p>
+                        <p className="text-[10px] text-slate-500">View your records</p>
+                      </div>
+                    </Link>
+                    
+                    <div className="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
+                    
+                    <Link 
+                      href="/doctor/login" 
+                      onClick={() => setLoginOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
+                        <Stethoscope className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                      </div>
+                      <div>
+                        <p className="text-slate-900 dark:text-white">Doctor Login</p>
+                        <p className="text-[10px] text-slate-500">Access clinical portal</p>
+                      </div>
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* --- REGISTER DROPDOWN --- */}
+              <div className="relative" ref={registerRef}>
+                <button
+                  onClick={() => { setRegisterOpen(!registerOpen); setLoginOpen(false); }}
                   className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 flex items-center gap-1 font-medium"
                 >
                   Register
                   <ChevronDown className="w-4 h-4" />
                 </button>
                 
-                {dropdownOpen && (
+                {registerOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-2 z-50">
                     <Link 
                       href="/register" 
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={() => setRegisterOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium"
                     >
                       <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
@@ -200,7 +237,7 @@ export function Navbar() {
                     
                     <Link 
                       href="/doctor/register" 
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={() => setRegisterOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium"
                     >
                       <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
@@ -219,14 +256,5 @@ export function Navbar() {
         </div>
       </div>
     </nav>
-  );
-}
-
-// Small helper for the Microscope icon in the navbar
-function MicroscopeIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>
-    </svg>
   );
 }
