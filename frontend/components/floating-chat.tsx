@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Loader2, Sparkles, Bot } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { motion, useDragControls, AnimatePresence } from 'framer-motion';
+import { motion, useDragControls } from 'framer-motion';
 
 type Msg = { role: 'user' | 'bot'; content: string };
 
@@ -16,7 +16,6 @@ export function FloatingChat() {
   const [loading, setLoading] = useState(false);
   const [context, setContext] = useState<any>(null);
   const [language, setLanguage] = useState('en');
-  const [showTooltip, setShowTooltip] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const dragControls = useDragControls();
@@ -42,16 +41,6 @@ export function FloatingChat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
-
-  // Show tooltip once after mount
-  useEffect(() => {
-    const showTimer = setTimeout(() => setShowTooltip(true), 1000);
-    const hideTimer = setTimeout(() => setShowTooltip(false), 6000);
-    return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-    };
-  }, []);
 
   const send = async () => {
     if (!input.trim() || loading) return;
@@ -94,43 +83,16 @@ export function FloatingChat() {
           dragListener={false}
           dragMomentum={false}
           dragElastic={0.2}
-          onDragStart={() => {
-            setIsDragging(true);
-            setShowTooltip(false);
-          }}
-          onDragEnd={() => {
-            setTimeout(() => setIsDragging(false), 100);
-          }}
-          onMouseEnter={() => !isDragging && setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
+          onDragStart={() => setIsDragging(true)}
+          onDragEnd={() => setTimeout(() => setIsDragging(false), 100)}
           className="fixed bottom-8 right-8 z-[9999]"
           style={{ touchAction: 'none' }}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 260, damping: 20 }}
         >
-          <div className="relative">
-            {/* Tooltip - pushed up slightly so it doesn't overlap the button */}
-            <AnimatePresence>
-              {showTooltip && !isDragging && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  transition={{ duration: 0.18 }}
-                  className="absolute bottom-full right-0 mb-4 w-max max-w-[240px] rounded-xl bg-slate-900 text-white text-xs px-4 py-3 shadow-2xl border border-slate-700 pointer-events-none"
-                >
-                  <div className="flex items-center gap-1.5 font-semibold mb-1 text-indigo-300">
-                    <Sparkles className="w-4 h-4" />
-                    HemaSight AI
-                  </div>
-                  <span className="text-slate-200">Ask me about your blood test results</span>
-                  <span className="absolute top-full right-7 -mt-[5px] w-3 h-3 bg-slate-900 border-r border-b border-slate-700 rotate-45" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Main button - Changed to WHITE background so purple icon pops */}
+          <div className="relative group">
+            {/* Main button - Pure White with deep shadow */}
             <div
               onPointerDown={(e) => dragControls.start(e)}
               onClick={() => {
@@ -138,21 +100,17 @@ export function FloatingChat() {
               }}
               role="button"
               aria-label="Open HemaSight AI assistant"
-              className="group relative p-4 rounded-full bg-white text-indigo-600 shadow-[0_4px_20px_rgb(0,0,0,0.15)] border-2 border-indigo-100 hover:shadow-[0_4px_25px_rgb(0,0,0,0.2)] hover:border-indigo-300 cursor-grab active:cursor-grabbing transition-all"
+              className="relative flex items-center justify-center w-16 h-16 rounded-full bg-white text-indigo-600 shadow-[0_8px_30px_rgb(0,0,0,0.2)] border-2 border-indigo-50 hover:shadow-[0_8px_30px_rgba(79,70,229,0.3)] hover:scale-105 transition-all duration-300 cursor-grab active:cursor-grabbing"
             >
-              {/* Pulsing ring */}
-              <span className="absolute inset-0 rounded-full ring-4 ring-indigo-500/20 animate-ping pointer-events-none" />
-              <span className="absolute inset-0 rounded-full ring-2 ring-indigo-500/30 pointer-events-none" />
-
-              {/* Assistant Icon Stack - Larger and clearer */}
+              {/* Assistant Icon Stack */}
               <div className="relative pointer-events-none flex items-center justify-center">
-                <Bot className="w-7 h-7" strokeWidth={2.5} />
-                {/* Bright yellow sparkle floating on top right */}
-                <Sparkles className="absolute -top-2 -right-2 w-4 h-4 text-amber-400 drop-shadow-md" fill="currentColor" />
+                <Bot className="w-8 h-8" strokeWidth={2.2} />
+                {/* Bright yellow sparkle */}
+                <Sparkles className="absolute -top-2 -right-2 w-5 h-5 text-amber-400 drop-shadow-md" fill="currentColor" />
               </div>
 
               {/* Online indicator dot */}
-              <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse pointer-events-none" />
+              <span className="absolute top-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white animate-pulse pointer-events-none" />
             </div>
           </div>
         </motion.div>
