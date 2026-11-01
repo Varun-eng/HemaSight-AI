@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Loader2, Sparkles, Bot } from 'lucide-react';
+import { X, Send, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { motion, useDragControls } from 'framer-motion';
 
@@ -75,7 +75,7 @@ export function FloatingChat() {
 
   return (
     <>
-      {/* Draggable Floating Icon with Assistant Badge */}
+      {/* Draggable Floating Icon */}
       {!isOpen && (
         <motion.div
           drag
@@ -85,14 +85,13 @@ export function FloatingChat() {
           dragElastic={0.2}
           onDragStart={() => setIsDragging(true)}
           onDragEnd={() => setTimeout(() => setIsDragging(false), 100)}
-          className="fixed bottom-8 right-8 z-[9999]"
+          className="fixed bottom-6 right-6 z-[99999]"
           style={{ touchAction: 'none' }}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 260, damping: 20 }}
         >
           <div className="relative group">
-            {/* Main button - Pure White with deep shadow */}
             <div
               onPointerDown={(e) => dragControls.start(e)}
               onClick={() => {
@@ -100,17 +99,34 @@ export function FloatingChat() {
               }}
               role="button"
               aria-label="Open HemaSight AI assistant"
-              className="relative flex items-center justify-center w-16 h-16 rounded-full bg-white text-indigo-600 shadow-[0_8px_30px_rgb(0,0,0,0.2)] border-2 border-indigo-50 hover:shadow-[0_8px_30px_rgba(79,70,229,0.3)] hover:scale-105 transition-all duration-300 cursor-grab active:cursor-grabbing"
+              className="relative flex items-center justify-center w-16 h-16 rounded-full cursor-grab active:cursor-grabbing transition-transform duration-300 hover:scale-105"
+              style={{
+                backgroundColor: '#4f46e5', // Hardcoded Indigo-600
+                boxShadow: '0 8px 30px rgba(79, 70, 229, 0.4)', // Explicit shadow
+                border: '2px solid white'
+              }}
             >
-              {/* Assistant Icon Stack */}
-              <div className="relative pointer-events-none flex items-center justify-center">
-                <Bot className="w-8 h-8" strokeWidth={2.2} />
-                {/* Bright yellow sparkle */}
-                <Sparkles className="absolute -top-2 -right-2 w-5 h-5 text-amber-400 drop-shadow-md" fill="currentColor" />
+              {/* Custom Inline SVG Assistant Icon (Immune to global CSS conflicts) */}
+              <div className="relative pointer-events-none flex items-center justify-center text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 8V4H8" />
+                  <rect width="16" height="12" x="4" y="8" rx="2" />
+                  <path d="M2 14h2" />
+                  <path d="M20 14h2" />
+                  <path d="M15 13v2" />
+                  <path d="M9 13v2" />
+                </svg>
+                {/* Sparkle SVG */}
+                <svg className="absolute -top-2 -right-2 w-5 h-5 drop-shadow-md" fill="#fbbf24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+                </svg>
               </div>
 
               {/* Online indicator dot */}
-              <span className="absolute top-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white animate-pulse pointer-events-none" />
+              <span 
+                className="absolute top-0 right-0 w-4 h-4 rounded-full border-2 border-white animate-pulse pointer-events-none" 
+                style={{ backgroundColor: '#10b981' }} // Hardcoded Emerald-500
+              />
             </div>
           </div>
         </motion.div>
@@ -118,7 +134,7 @@ export function FloatingChat() {
 
       {/* Chat Window */}
       <div
-        className={`fixed bottom-6 right-6 z-[9999] w-full max-w-[380px] h-[550px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
+        className={`fixed bottom-6 right-6 z-[99999] w-full max-w-[380px] h-[550px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
           isOpen ? 'scale-100 opacity-100 visible' : 'scale-0 opacity-0 invisible pointer-events-none'
         }`}
       >
@@ -127,14 +143,23 @@ export function FloatingChat() {
           <div className="flex items-center gap-2">
             <div className="relative">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                <Bot className="w-5 h-5" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 8V4H8" />
+                  <rect width="16" height="12" x="4" y="8" rx="2" />
+                  <path d="M2 14h2" />
+                  <path d="M20 14h2" />
+                  <path d="M15 13v2" />
+                  <path d="M9 13v2" />
+                </svg>
               </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-indigo-600" />
             </div>
             <div>
               <h3 className="font-bold text-sm flex items-center gap-1">
                 HemaSight AI
-                <Sparkles className="w-3 h-3 text-yellow-300" />
+                <svg className="w-3 h-3 text-yellow-300" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+                </svg>
               </h3>
               <p className="text-[10px] text-indigo-200">RAG Medical Assistant</p>
             </div>
@@ -146,7 +171,7 @@ export function FloatingChat() {
 
         {/* Language */}
         <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-          <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full text-xs p-1.5 rounded bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600">
+          <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full text-xs p-1.5 rounded bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none">
             {languages.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
           </select>
         </div>
@@ -157,7 +182,14 @@ export function FloatingChat() {
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {m.role === 'bot' && (
                 <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center mr-1.5 mt-1 shrink-0">
-                  <Bot className="w-3.5 h-3.5" />
+                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 8V4H8" />
+                    <rect width="16" height="12" x="4" y="8" rx="2" />
+                    <path d="M2 14h2" />
+                    <path d="M20 14h2" />
+                    <path d="M15 13v2" />
+                    <path d="M9 13v2" />
+                  </svg>
                 </div>
               )}
               <div className={`max-w-[80%] p-3 rounded-2xl text-sm whitespace-pre-wrap ${
@@ -170,7 +202,14 @@ export function FloatingChat() {
           {loading && (
             <div className="flex justify-start">
               <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center mr-1.5 mt-1 shrink-0">
-                <Bot className="w-3.5 h-3.5" />
+                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 8V4H8" />
+                  <rect width="16" height="12" x="4" y="8" rx="2" />
+                  <path d="M2 14h2" />
+                  <path d="M20 14h2" />
+                  <path d="M15 13v2" />
+                  <path d="M9 13v2" />
+                </svg>
               </div>
               <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl rounded-bl-sm">
                 <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
