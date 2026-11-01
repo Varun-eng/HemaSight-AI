@@ -24,18 +24,20 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
+  // Redirect to login if trying to access dashboard without auth
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
-  if (
-    user &&
-    (request.nextUrl.pathname === '/login' ||
-      request.nextUrl.pathname === '/register')
-  ) {
+
+  // Redirect to doctor login if trying to access doctor dashboard without auth
+  if (!user && request.nextUrl.pathname.startsWith('/doctor/dashboard')) {
+    return NextResponse.redirect(new URL('/doctor/login', request.url));
+  }
+
+  // If logged in, redirect away from login pages
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/doctor/login')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
@@ -43,5 +45,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register'],
+  matcher: ['/dashboard/:path*', '/doctor/dashboard/:path*', '/login', '/doctor/login'],
 };
