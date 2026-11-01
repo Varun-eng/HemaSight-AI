@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, Sparkles, Bot, Stethoscope } from 'lucide-react';
+import { X, Send, Loader2, Sparkles, Bot } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { motion, useDragControls, AnimatePresence } from 'framer-motion';
 
@@ -43,10 +43,10 @@ export function FloatingChat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
-  // Show tooltip once after mount, hide after a few seconds
+  // Show tooltip once after mount
   useEffect(() => {
-    const showTimer = setTimeout(() => setShowTooltip(true), 1200);
-    const hideTimer = setTimeout(() => setShowTooltip(false), 6500);
+    const showTimer = setTimeout(() => setShowTooltip(true), 1500);
+    const hideTimer = setTimeout(() => setShowTooltip(false), 8000);
     return () => {
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
@@ -98,8 +98,11 @@ export function FloatingChat() {
             setIsDragging(true);
             setShowTooltip(false);
           }}
-          onDragEnd={() => setIsDragging(false)}
-          onMouseEnter={() => setShowTooltip(true)}
+          onDragEnd={() => {
+            // Small delay to prevent the click event from firing after drag ends
+            setTimeout(() => setIsDragging(false), 100);
+          }}
+          onMouseEnter={() => !isDragging && setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
           className="fixed bottom-6 right-6 z-[9999]"
           style={{ touchAction: 'none' }}
@@ -116,15 +119,14 @@ export function FloatingChat() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
                   transition={{ duration: 0.18 }}
-                  className="absolute bottom-full right-0 mb-3 w-max max-w-[220px] rounded-xl bg-slate-900 text-white text-xs px-3 py-2 shadow-xl border border-slate-700 pointer-events-none"
+                  className="absolute bottom-full right-0 mb-3 w-max max-w-[240px] rounded-xl bg-slate-900 text-white text-xs px-3.5 py-2.5 shadow-xl border border-slate-700 pointer-events-none"
                 >
-                  <div className="flex items-center gap-1.5 font-semibold mb-0.5">
-                    <Sparkles className="w-3 h-3 text-indigo-300" />
+                  <div className="flex items-center gap-1.5 font-semibold mb-0.5 text-indigo-300">
+                    <Sparkles className="w-3.5 h-3.5" />
                     HemaSight AI
                   </div>
-                  <span className="text-slate-300">Ask me about your blood test results</span>
-                  {/* little arrow */}
-                  <span className="absolute top-full right-6 -mt-1 w-2 h-2 bg-slate-900 border-r border-b border-slate-700 rotate-45" />
+                  <span className="text-slate-200">Ask me about your blood test results</span>
+                  <span className="absolute top-full right-6 -mt-1 w-2.5 h-2.5 bg-slate-900 border-r border-b border-slate-700 rotate-45" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -139,27 +141,27 @@ export function FloatingChat() {
               aria-label="Open HemaSight AI assistant"
               className="group relative p-4 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-xl hover:shadow-2xl hover:from-indigo-600 hover:to-indigo-800 cursor-grab active:cursor-grabbing transition-all"
             >
-              {/* Assistant avatar ring */}
+              {/* Pulsing ring */}
               <span className="absolute inset-0 rounded-full ring-2 ring-indigo-300/50 animate-ping pointer-events-none" />
               <span className="absolute inset-0 rounded-full ring-2 ring-indigo-300/40 pointer-events-none" />
 
-              {/* Icon stack: assistant bot + tiny medical sparkle */}
-              <div className="relative pointer-events-none">
+              {/* Assistant Icon Stack */}
+              <div className="relative pointer-events-none flex items-center justify-center">
                 <Bot className="w-6 h-6" strokeWidth={2.2} />
                 <Sparkles className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 text-yellow-300 drop-shadow" />
               </div>
 
-              {/* Online / notification dot */}
+              {/* Online indicator dot */}
               <span className="absolute top-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white animate-pulse pointer-events-none" />
             </div>
           </div>
         </motion.div>
       )}
 
-      {/* Chat Window */}
+      {/* Chat Window - FIXED: Changed pointer-events-none to pointer-events-none invisible when closed */}
       <div
         className={`fixed bottom-6 right-6 z-[9999] w-full max-w-[380px] h-[550px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
-          isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+          isOpen ? 'scale-100 opacity-100 visible' : 'scale-0 opacity-0 invisible pointer-events-none'
         }`}
       >
         {/* Header */}
